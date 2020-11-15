@@ -37,7 +37,7 @@ jobs:
     - name: Copy files
       run: |
         mkdir -p docs
-        cp -r public/* docs
+        cp -r resources/public/* docs
     - name: Git configuration
       run: |
           git config user.name "github-actions[bot]"

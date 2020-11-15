@@ -1,0 +1,48 @@
+name: Clojure CI/CD
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  merge-pages:
+    name: Merge to gh-pages branch
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          ref: 'gh-pages'
+          fetch-depth: 0
+    - name: Git configuration
+      run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+    - name: Merge to gh-pages
+      run: |
+        git merge origin/master
+        git push
+  deploy:
+    name: Update github pages
+    runs-on: ubuntu-latest
+    needs: merge-pages
+    steps:
+    - uses: actions/checkout@v2
+      with:
+          ref: 'gh-pages'
+          fetch-depth: 0
+    - name: Build github-pages
+      run: lein fig:min
+    - name: Copy files
+      run: |
+        mkdir -p docs
+        cp -r public/* docs
+    - name: Git configuration
+      run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+    - name: Git Commit and Push
+      run: |
+        git add docs
+        git diff-index --quiet HEAD || (git commit -m "Update github pages" && git push)
